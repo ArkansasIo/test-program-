@@ -1,64 +1,76 @@
-# Universe Civilization Mobile API Contract
+# Railway Operations API Contract
 
-This contract defines HTTPS JSON endpoints for the Android companion and web client. It does not imply that the endpoints are already deployed. Route implementations should live in the server backend and authenticate every private operation.
+This contract defines the HTTP API boundary for the Railway Operations Control Platform. Endpoints are examples of the platform contract and do not imply that every production service is deployed.
 
 ## Conventions
 
-- Base URL: `https://YOUR_API_HOST/api/v1`
+- Base URL: `https://<api-host>/api/v1`
 - Content type: `application/json`
-- Private endpoints require `Authorization: Bearer <access-token>`.
-- Never ship database credentials or privileged service keys in the Android APK.
-- Return non-2xx status codes for failures with `{ "error": { "code": "...", "message": "..." } }`.
-- Validate and authorize resource ownership on every request.
+- Private endpoints require an access token.
+- All writes require authentication and authorization.
+- Every consequential command returns a correlation/request ID.
+- Production integrations must use TLS and secure credential storage.
 
-## Endpoints
+## Core Endpoints
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/health` | Service health/version |
-| POST | `/auth/register` | Create an account |
-| POST | `/auth/login` | Authenticate and issue access token |
-| GET | `/commander` | Current commander profile |
-| GET | `/resources` | Current resource balances |
-| GET | `/planets` | Player-owned colonies |
-| GET | `/fleet` | Player-owned fleet overview |
-| GET | `/research` | Technology and active research |
-| GET | `/stargates` | Authorized gate network status |
-| POST | `/turn/process` | Process a turn (idempotency key required) |
+| GET | `/health` | API health and version |
+| GET | `/trains` | Current train records |
+| GET | `/trains/{id}` | Train detail |
+| POST | `/dispatch/commands` | Submit authorized train command |
+| GET | `/services` | Published services |
+| GET | `/timetables/{id}` | Timetable version |
+| GET | `/network/map` | Network and infrastructure state |
+| GET | `/stations` | Station and platform state |
+| GET | `/fleet` | Fleet and vehicle state |
+| GET | `/maintenance/work-orders` | Maintenance workload |
+| GET | `/crew/duties` | Crew duty state |
+| GET | `/incidents` | Safety incidents |
+| GET | `/analytics/kpis` | Operations KPIs |
+| GET | `/audit/events` | Authorized audit history |
 
-## Example responses
-
-### GET /health
-
-```json
-{ "status": "ok", "service": "universe-civilization-api", "version": "1.0.0" }
-```
-
-### GET /resources
+## Command Request
 
 ```json
 {
-  "naquadah": 120000,
-  "bankedNaquadah": 45000,
-  "metal": 80000,
-  "crystal": 24000,
-  "deuterium": 9000,
-  "energy": 2200,
-  "darkMatter": 0
+  "trainId": "TRN-204",
+  "command": "hold",
+  "target": "STN-CENTRAL",
+  "reason": "Platform conflict"
 }
 ```
 
-Sample values are illustrative only; production responses must come from authorized game state.
+## Command Response
 
-## Android connection policy
+```json
+{
+  "data": {
+    "accepted": true,
+    "trainId": "TRN-204",
+    "command": "hold"
+  },
+  "requestId": "req-01HXYZ",
+  "timestamp": "2026-10-20T20:00:00Z"
+}
+```
 
-Use HTTPS in release builds. Keep the API URL configurable through build configuration or a settings screen. Do not disable TLS validation. Refresh tokens securely and use short-lived access tokens. Do not store passwords or long-lived secrets in plain text.
+## Error Contract
 
-## Server implementation checklist
+```json
+{
+  "error": {
+    "code": "COMMAND_REJECTED",
+    "message": "The requested state transition is not permitted.",
+    "requestId": "req-01HXYZ"
+  }
+}
+```
 
-1. Add the routes to the existing PHP backend or a dedicated API service.
-2. Use prepared SQL statements and database transactions for writes.
-3. Implement password hashing, rate limiting, validation and token expiry.
-4. Enforce player ownership for planets, resources, fleets and research.
-5. Make turn processing atomic and idempotent.
-6. Add integration tests before pointing the Android client at production.
+## Authorization
+
+Use role-based access control and resource-level authorization. A dispatcher may receive train-control permissions without receiving administration, personnel, or security permissions. Elevated commands require explicit policy checks.
+
+## Safety Boundary
+
+The API is an application integration boundary. Safety-critical movement authority must remain under the appropriate certified railway control architecture. The API must fail closed when authorization, data freshness, or safety preconditions cannot be established.
