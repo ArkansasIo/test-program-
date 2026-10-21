@@ -1,104 +1,37 @@
 # Railway Platform Architecture
 
-## Platform layers
+## Architecture Layers
+
+1. **Presentation** — React railway shell, modules, pages, maps, tables, timelines, inspectors.
+2. **Controller** — page workflows, command validation, local UI state.
+3. **API** — typed request/response contracts and transport.
+4. **Domain Services** — trains, timetable, network, fleet, stations, maintenance, crew, safety, analytics.
+5. **Persistence** — authoritative operational database and audit store.
+6. **Integration** — external railway systems, telemetry, identity, event streams.
+
+## Navigation Contract
+
+The module catalog is the single source for main menus, submenus, page titles, page IDs, controls, and action IDs.
+
+## Runtime Modes
+
+- Demo/local mode
+- Connected operational mode
+- Degraded/read-only mode
+- Maintenance mode
+
+The UI must clearly identify the active mode.
+
+## Command Lifecycle
 
 ```text
-Railway Operations Platform
-├── Presentation
-│   ├── Platform Shell
-│   ├── Module Rail
-│   ├── Submodule Pane
-│   ├── Command Bar
-│   ├── Data Table
-│   ├── Network Map
-│   ├── Timeline
-│   ├── Inspector
-│   └── Status Bar
-├── Controllers
-│   ├── Module Controller
-│   ├── Command Controller
-│   ├── Selection Controller
-│   ├── Inspector Controller
-│   └── Notification Controller
-├── Domain Modules
-│   ├── Operations Control
-│   ├── Network & Routes
-│   ├── Rolling Stock
-│   ├── Stations & Yards
-│   ├── Maintenance
-│   ├── Signals & Interlocking
-│   ├── Crew & Resources
-│   ├── Safety & Incidents
-│   ├── Analytics & Reports
-│   └── System Administration
-└── API
-    ├── Train API
-    ├── Dispatch API
-    ├── Module State API
-    ├── Network API
-    ├── Incident API
-    ├── Maintenance API
-    └── Administration API
+Intent → Permission → Validation → Confirmation → API → Result → Audit → UI Refresh
 ```
 
-## GUI controller behavior
+## Reliability
 
-The platform uses a three-to-four pane desktop layout:
+Use request IDs, timeouts, retries only for safe/idempotent operations, stale-data detection, error boundaries, and explicit offline/degraded indicators.
 
-1. **Module rail** — major operational domains.
-2. **Submodule pane** — pages and controllers belonging to the selected domain.
-3. **Workspace** — maps, tables, timelines, forms, workflows, charts, or consoles.
-4. **Inspector** — selected train, block, signal, station, work order, or incident.
+## Safety Boundary
 
-The layout collapses to a two-pane and then single-pane mobile layout at smaller widths.
-
-## Safety-oriented command model
-
-Dispatch controls are explicit actions rather than passive links:
-
-- Dispatch
-- Hold
-- Reroute
-- Stop
-- Release
-- Workflow
-- Open Detail
-
-Production integrations should add authorization, interlocking validation, audit logging, command idempotency, operator identity, and server-side safety checks before executing real railway commands.
-
-## API contract
-
-Base URL:
-
-```text
-/api/railway
-```
-
-Core endpoints:
-
-```text
-GET    /trains
-GET    /trains/:trainId
-GET    /modules/:moduleId
-POST   /dispatch/commands
-```
-
-The frontend API client normalizes responses into:
-
-```ts
-{
-  ok: boolean;
-  data?: T;
-  error?: { code: string; message: string };
-  requestId: string;
-  timestamp: string;
-}
-```
-
-## Module registry
-
-The canonical module registry is `src/railway/railwayModules.ts`. It is the source of truth for module IDs, submodule IDs, descriptions, control types, and available actions.
-
-## Frontend entry point
-
-The railway platform can be opened from the main command deck using **RAILWAY CONTROL**. This keeps the railway system available without replacing the existing universe command navigation.
+Railway safety authority remains external to this application layer unless a separately certified architecture is established.
