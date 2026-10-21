@@ -73,6 +73,10 @@ CREATE TABLE IF NOT EXISTS railway_integrations (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Added to the existing railway_crew_members table from railway_schema.sql.
+ALTER TABLE railway_crew_members
+  ADD COLUMN IF NOT EXISTS qualification_ids_json JSON NOT NULL DEFAULT (JSON_ARRAY());
+
 CREATE INDEX idx_service_state ON railway_services(state);
 CREATE INDEX idx_timetable_date ON railway_timetables(service_date);
 CREATE INDEX idx_route_state ON railway_routes(state);
