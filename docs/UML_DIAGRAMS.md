@@ -1,35 +1,49 @@
-# UML Diagrams & Architecture Reference — Universe Civilization
+# Railway UML Diagrams
 
-*See master root document [ARCHITECTURE_UML.md](/ARCHITECTURE_UML.md) for full detailed diagram collection.*
+## Module Structure
 
-## 1. System Component Overview
 ```mermaid
-graph TD
-    App[App.tsx]
-    Views[Command Views 20+]
-    Calculations[colonyCalculations.ts]
-    Engines[Turn & Combat Engines]
-    Audio[sound.ts Audio Bus]
-    Storage[(LocalStorage Cache)]
-
-    App --> Views
-    Views --> Calculations
-    App --> Engines
-    App --> Audio
-    App --> Storage
+graph LR
+  Control[Control Center]
+  Timetable[Timetable & Service]
+  Network[Network Infrastructure]
+  Fleet[Train Fleet]
+  Stations[Stations & Terminals]
+  Signals[Signaling & Control]
+  Maintenance[Asset Maintenance]
+  Crew[Crew Operations]
+  Safety[Safety & Emergency]
+  Analytics[Performance Intelligence]
+  Admin[Administration & Security]
 ```
 
-## 2. Colony Maintenance Flow
+## Command Flow
+
 ```mermaid
-flowchart TD
-    Start([Turn Trigger]) --> GetColonies[Scan Player Colonies]
-    GetColonies --> CalcBase[Base Cost = Level * 2500 + Level^1.45 * 850]
-    CalcBase --> ApplyHomeworld{Is Homeworld?}
-    ApplyHomeworld -- Yes --> Discount[-25% Cost]
-    ApplyHomeworld -- No --> FullCost[100% Cost]
-    Discount --> LogisticalStrain[Multiply by 1.0 + (Worlds - 2) * 0.08]
-    FullCost --> LogisticalStrain
-    LogisticalStrain --> ApplyDirectives[Apply Spec & Tax Modifiers]
-    ApplyDirectives --> DeductFromIncome[Deduct Upkeep from Gross Turn Tribute]
-    DeductFromIncome --> End([Final Net Turn Income])
+sequenceDiagram
+  actor Operator
+  participant Page
+  participant API
+  participant Auth
+  participant Audit
+  Operator->>Page: Choose action
+  Page->>API: Typed command
+  API->>Auth: Authorize
+  Auth-->>API: Result
+  API->>Audit: Record
+  API-->>Page: Command result
+```
+
+## Entity Relationship
+
+```mermaid
+erDiagram
+  SERVICE ||--o{ TRAIN : schedules
+  TRAIN }o--|| CONSIST : uses
+  TRAIN }o--|| STATION : visits
+  ROUTE ||--o{ TRACK_SECTION : contains
+  TRACK_SECTION }o--o{ SIGNAL : protected-by
+  VEHICLE ||--o{ WORK_ORDER : receives
+  INCIDENT }o--o{ TRAIN : concerns
+  USER ||--o{ AUDIT_EVENT : creates
 ```
