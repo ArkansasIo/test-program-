@@ -1,6 +1,5 @@
 import express from 'express';
-import { INITIAL_RAILWAY_ALERTS, INITIAL_RAILWAY_TRAINS } from '../src/railway/railwayModels';
-import { INITIAL_RAILWAY_DOMAIN_STATE } from '../src/railway/railwayDomainModels';
+import { INITIAL_RAILWAY_ALERTS } from '../src/railway/railwayModels';
 import { railwayOperationsService } from '../src/railway/railwayService';
 import { checkRailwayHealth, overallHealth } from '../src/railway/railwayHealth';
 import { railwayAuditLog } from '../src/railway/railwayAudit';
@@ -99,10 +98,7 @@ export function createRailwayServer() {
     }
   });
 
-  app.get('/api/railway/modules/:moduleId', (req, res) => {
-    const moduleId = idParam(req.params.moduleId);
-    sendData(res, { moduleId, state: railwayOperationsService.getControlState(), domain: railwayOperationsService.getDomainState() });
-  });
+  app.get('/api/railway/modules/:moduleId', (req, res) => sendData(res, { moduleId: idParam(req.params.moduleId), state: railwayOperationsService.getControlState(), domain: railwayOperationsService.getDomainState() }));
 
   app.get('/api/railway/services', (_req, res) => sendData(res, railwayOperationsService.getDomainState().services));
   app.get('/api/railway/timetables', (_req, res) => sendData(res, railwayOperationsService.getDomainState().timetables));
@@ -119,7 +115,7 @@ export function createRailwayServer() {
     const state = railwayOperationsService.getDomainState();
     const index = state.timetables.findIndex((item) => item.id === idParam(req.params.id));
     if (index < 0) return sendError(res, 404, 'TIMETABLE_NOT_FOUND', 'Timetable was not found.');
-    state.timetables[index] = { ...state.timetables[index], ...req.body, status: req.body?.status ?? state.timetables[index].status };
+    state.timetables[index] = { ...state.timetables[index], ...req.body };
     railwayOperationsService.replaceDomainState(state);
     audit(req, 'update', 'timetable', state.timetables[index].id);
     return sendData(res, state.timetables[index]);
@@ -288,7 +284,7 @@ export function createRailwayServer() {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders?.();
-    res.write(`retry: 5000\n\n`);
+    res.write('retry: 5000\n\n');
     const unsubscribe = railwayEventBus.subscribe((event) => res.write(`data: ${JSON.stringify(event)}\n\n`));
     req.on('close', unsubscribe);
   });
