@@ -1,31 +1,31 @@
 import type { NextFunction, Request, Response } from 'express';
-
-export type RailwayRole = 'viewer' | 'dispatcher' | 'maintenance' | 'safety' | 'administrator';
-
-export interface RailwayPrincipal {
-  id: string;
-  role: RailwayRole;
-}
-
-const roleRank: Record<RailwayRole, number> = {
-  viewer: 10,
-  dispatcher: 20,
-  maintenance: 20,
-  safety: 30,
-  administrator: 40,
-};
+import { hasPermission, type RailwayPermission, type RailwayPrincipal, type RailwayRole } from '../src/railway/railwayAuth';
 
 export function principalFromRequest(req: Request): RailwayPrincipal {
   const id = req.header('x-railway-user') || 'anonymous';
-  const role = (req.header('x-railway-role') || 'viewer') as RailwayRole;
-  return { id, role: role in roleRank ? role : 'viewer' };
+  const username = req.header('x-railway-username') || id;
+  const rawRoles = (req.header('x-railway-role') || 'viewer').split(',').map((value) => value.trim()) as RailwayRole[];
+  const allowed: RailwayRole[] = ['administrator', 'dispatcher', 'station-controller', 'maintenance-controller', 'crew-controller', 'safety-manager', 'analyst', 'viewer'];
+  const roles = rawRoles.filter((role) => allowed.includes(role));
+  return { id, username, roles: roles.length ? roles : ['viewer'], enabled: true };
 }
 
-export function requireRailwayRole(minimumRole: RailwayRole) {
+export function requireRailwayPermission(permission: RailwayPermission) {
   return (req: Request, res: Response, next: NextFunction) => {
     const principal = principalFromRequest(req);
-    if (roleRank[principal.role] < roleRank[minimumRole]) {
-      res.status(403).json({ error: { code: 'FORBIDDEN', message: `Role ${minimumRole} or higher is required.` } });
+    if (!hasPermission(principal, permission)) {
+      res.status(403).json({ error: { code: 'FORBIDDEN', message: `Permission ${permission} is required.` } });
+      return;
+    }
+    next();
+  };
+}
+
+export function requireRailwayRole(role: RailwayRole) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const principal = principalFromRequest(req);
+    if (!principal.roles.includes(role) && !principal.roles.includes('administrator')) {
+      res.status(403).json({ error: { code: 'FORBIDDEN', message: `Role ${role} is required.` } });
       return;
     }
     next();
