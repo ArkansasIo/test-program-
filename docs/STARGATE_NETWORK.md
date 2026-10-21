@@ -1,11 +1,25 @@
-# Stargate DHD Network & Subspace Wormhole Specification
+# Railway Network Connectivity
 
-## 1. Dialing Protocol
-- 39 Constellation Glyphs.
-- 6 Spatial Coordinates + 1 Point of Origin = 7 Chevron Lock Sequence.
-- Maximum Wormhole Duration: 38 Earth standard minutes.
+The former stargate network model is replaced by railway network connectivity.
 
-## 2. Iris Defensive Protection Grid
-- **Deployment Time**: Instant (0.5s mechanical sweep).
-- **Material**: Titanium-Trinium Reinforced Alloy.
-- **Function**: Subatomic barrier 3 micrometers from event horizon, preventing incoming matter re-integration.
+## Network Model
+
+```text
+Railway
+├── Region
+├── Route
+├── Line
+├── Track Section
+├── Station
+├── Platform
+├── Junction
+└── Engineering Work Zone
+```
+
+## Network Map
+
+The network map displays routes, trains, infrastructure state, restrictions, work zones, and operational alerts. Map data must show source and freshness.
+
+## Routing
+
+Route selection considers infrastructure availability, restrictions, scheduled service, and authorized operating rules. Final movement authority remains outside the web UI safety boundary.
