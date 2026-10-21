@@ -1,135 +1,149 @@
-# Universe Civilization: Empire at Wars — API, State & Data Architecture Specification
+# Railway Operations Platform — API & Data Specification
 
-> **Document Version**: 3.2.0  
-> **Schema Type**: TypeScript Interface & Data Storage Contracts
+## 1. Purpose
 
----
+This specification defines the canonical data model used by the railway operations UI and API. The model separates planned service, live operational state, infrastructure state, people, assets, safety events, and audit records.
 
-## 1. LocalStorage Persistence Contracts
+## 2. Identifier Standards
 
-All game state is stored locally within the user's browser, enabling instant offline persistence and session continuity.
+```text
+Menu:       railway.<domain>
+Module:     <domain-name>
+Page:       railway.page.<page-name>
+Entity:     railway.<entity>.<id>
+Action:     <verb>
+Correlation: <request-id>
+```
 
-| Storage Key | Type / Interface | Description |
-|---|---|---|
-| `uc_active_profile` | `PlayerProfile` | Current commander persona, race, government, scores, DEFCON |
-| `uc_player_resources` | `PlayerResources` | Currencies (Naquadah, Vault, Metal, Crystal, Deuterium, Energy, Dark Matter) |
-| `uc_planets` | `PlanetColony[]` | All colonized worlds, tier levels, maintenance, hazards, life support |
-| `uc_active_selected_planet_id` | `string` | ID of the currently focused planetary colony |
-| `uc_mothership_titan` | `MothershipTitan` | Flagship specs, power allocation, weapons fitting, sorties |
-| `uc_stargate_nodes` | `StargateNetworkNode[]` | Stargates across all colonies, iris state, dialed addresses |
-| `uc_crontab_config` | `CronJobConfig[]` | Background cron scheduler rules and execution timers |
-| `uc_battle_pass_state` | `BattlePassState` | Free & VIP progression tier, daily quest claims, XP |
+## 3. Core TypeScript Models
 
----
+```ts
+export type RailwayStatus =
+  | 'planned' | 'ready' | 'active' | 'held' | 'delayed'
+  | 'completed' | 'cancelled' | 'degraded' | 'unavailable';
 
-## 2. Core Domain Data Contracts
+export interface TrainRecord {
+  id: string;
+  serviceId?: string;
+  runNumber?: string;
+  headcode?: string;
+  status: RailwayStatus;
+  origin?: string;
+  destination?: string;
+  currentLocation?: string;
+  plannedDeparture?: string;
+  actualDeparture?: string;
+  plannedArrival?: string;
+  actualArrival?: string;
+  delaySeconds?: number;
+  consistId?: string;
+  operator?: string;
+  lastUpdated: string;
+}
 
-### 2.1 Player Profile & Resources
+export interface DispatchCommand {
+  trainId: string;
+  command: 'dispatch' | 'hold' | 'reroute' | 'stop' | 'release';
+  target?: string;
+  reason?: string;
+}
 
-```typescript
-export interface PlayerProfile {
+export interface RailwayApiResponse<T> {
+  data: T;
+  requestId: string;
+  timestamp: string;
+  warnings?: string[];
+}
+```
+
+## 4. Infrastructure Entities
+
+```ts
+export interface TrackSection {
+  id: string;
+  routeId: string;
+  name: string;
+  status: RailwayStatus;
+  speedLimitKph?: number;
+  possession?: boolean;
+  restriction?: string;
+}
+
+export interface Signal {
+  id: string;
+  location: string;
+  aspect: 'red' | 'yellow' | 'double-yellow' | 'green' | 'unknown';
+  status: 'healthy' | 'degraded' | 'failed';
+}
+
+export interface Station {
   id: string;
   name: string;
-  race: 'asgard' | 'goauld' | 'replicator' | 'tauri' | 'tollan';
-  government: 'junta' | 'technocracy' | 'feudal' | 'republic' | 'hive';
-  rank: number;
-  defconLevel: 0 | 1 | 2 | 3 | 4;
-  overallScore: number;
-  militaryScore: number;
-  economyScore: number;
-  researchScore: number;
-  createdTimestamp: number;
-}
-
-export interface PlayerResources {
-  naquadah: number;
-  bankedNaquadah: number;
-  metal: number;
-  crystal: number;
-  deuterium: number;
-  energy: number;
-  darkMatter: number;
-  untrainedUnits: number;
-  miners: number;
-  lifers: number;
-  attackTurns: number;
+  platforms: string[];
+  status: RailwayStatus;
 }
 ```
 
-### 2.2 Planetary Colony Schema
+## 5. Planning Entities
 
-```typescript
-export interface PlanetColony {
+```ts
+export interface Service {
   id: string;
-  name: string;
-  coordinate: string; // e.g. "[1:240:8]"
-  biome: 'Terrestrial' | 'Desert' | 'Volcanic' | 'Oceanic' | 'Cryo-Glacial' | 'Plasma Gas';
-  level: number;
-  incomeBonus: number;
-  defenseBonus: number;
-  maintenanceCost?: number;
-  moonName?: string;
-  jumpGateLevel: number;
-  isHomeworld?: boolean;
-  specialization?: 'mining' | 'industrial' | 'research' | 'fortress' | 'trade';
-  taxPolicy?: 'subsidized' | 'balanced' | 'extractive';
-  fieldsUsed?: number;
-  fieldsMax?: number;
-  lifeSupport?: PlanetaryLifeSupport;
-  hazards?: PlanetaryHazard[];
+  serviceCode: string;
+  origin: string;
+  destination: string;
+  operatingDays: string[];
+  timetableVersion: string;
+  status: RailwayStatus;
+}
+
+export interface TimetableEntry {
+  id: string;
+  serviceId: string;
+  locationId: string;
+  arrival?: string;
+  departure?: string;
+  dwellSeconds?: number;
+  platform?: string;
 }
 ```
 
-### 2.3 Colony Maintenance & Fiscal Analysis
+## 6. Maintenance and Crew
 
-```typescript
-export interface ColonyMaintenanceBreakdown {
-  baseCost: number;
-  levelMultiplier: number;
-  homeworldDiscount: number;
-  logisticalStrain: number;
-  specializationModifier: number;
-  taxPolicyModifier: number;
-  totalMaintenanceCost: number;
-  grossIncome: number;
-  netIncome: number;
-  profitMarginPercent: number;
-  isDeficit: boolean;
-  breakdownCategories: {
-    administration: number; // 35%
-    logistics: number;      // 25%
-    lifeSupport: number;    // 20%
-    security: number;       // 20%
-  };
+Maintenance records should include asset ID, work order, defect, priority, planned window, responsible team, safety constraints, and completion evidence. Crew records should include employee ID, role, duty, qualifications, validity dates, working-time status, and assignment history.
+
+## 7. Safety and Audit
+
+```ts
+export interface Incident {
+  id: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'contained' | 'investigating' | 'closed';
+  location?: string;
+  reportedAt: string;
+  owner?: string;
 }
 
-export interface EmpireColonialSummary {
-  totalColonies: number;
-  totalColonyLevels: number;
-  totalGrossIncome: number;
-  totalMaintenanceCost: number;
-  netColonialIncome: number;
-  averageMaintenancePerLevel: number;
-  expansionEfficiencyRating: 'Optimal' | 'Sustainable' | 'Strained' | 'Over-Extended';
-  expansionEfficiencyPercent: number;
-  expansionRecommendation: string;
+export interface AuditEvent {
+  id: string;
+  actorId: string;
+  actionId: string;
+  targetId?: string;
+  timestamp: string;
+  outcome: 'accepted' | 'rejected' | 'failed';
+  reason?: string;
+  correlationId: string;
 }
 ```
 
----
+## 8. Data Freshness
 
-## 3. Web Audio Synthesis Triggers (`src/sound.ts`)
+Every live operational record should expose an update timestamp. UI components must distinguish current data from stale data and show degraded connectivity instead of presenting stale state as live.
 
-The game features an internal Web Audio API sound synthesizer producing procedural retro-futuristic sound effects without external MP3 dependencies:
+## 9. Persistence
 
-| Sound Key | Frequency / Waveform Profile | Trigger Event |
-|---|---|---|
-| `click` | 800Hz Triangle Short Pulse | Standard UI button clicks |
-| `confirm` | 440Hz -> 880Hz Sine Ascending | Successful upgrade, purchase, or training |
-| `warning` | 220Hz Sawtooth Dual Pulse | Insufficient resources or invalid action |
-| `coin` | 1200Hz -> 1800Hz Sine Chime | Turn income collection or bank deposit |
-| `combat` | 100Hz Noise Burst + Square Wave | Combat engagement start |
-| `turn` | Harmonic major chord triad | Manual or cron turn step execution |
-| `gate_chevron` | 520Hz Resonant Metallic Clank | Stargate chevron lock |
-| `gate_kawoosh` | Low-frequency white noise woosh | Subspace wormhole event horizon open |
-| `iris_close` | Mechanical servo sweep | Titanium Iris closure |
+Browser storage is suitable for UI preferences, filters, cached non-authoritative data, and demonstration state. Authoritative train movement, signaling, safety, personnel, and asset records must be stored in a trusted backend.
+
+## 10. Validation
+
+API validation must reject malformed IDs, invalid state transitions, unauthorized commands, stale versions, missing reasons where required, and conflicting updates. The server remains authoritative.
