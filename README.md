@@ -1,126 +1,137 @@
-# Universe Civilization: Empire at Wars
+# Railway Operations Control Platform
 
-> **Galactic Command Interface & 4X Space MMO Simulator**  
-> Inspired by classic browser space strategy games (*Game*, *Stargate: Universe Civilization*, *EVE Online*).
+> Enterprise railway operations software for train control, timetabling, network infrastructure, rolling stock, stations, signaling, maintenance, crew operations, safety, analytics, and system administration.
 
----
+## Overview
 
-## 🌌 Overview
+This repository is a web-based railway operations platform built with React, TypeScript, Vite, and a modular API architecture. It is designed as a unified control-room application rather than a game client.
 
-**Universe Civilization: Empire at Wars** is an expansive, web-based 4X space strategy game and command center simulation. Players govern an interstellar civilization, manage strategic resources, conduct scientific research, build planet-shattering armadas, dial Stargates, command mothership titans, and battle across a persistent galaxy grid.
+The platform provides a common operational workspace for dispatchers, controllers, planners, engineers, maintenance teams, station operators, safety teams, analysts, and administrators.
 
-## ⚡ Core Features & Systems
+## Operating Domains
 
-### 1. Faction Races & Governments
-- **5 Iconic Races**:
-  - 🛸 **Asgard**: +25% Technology, Teleportation & Advanced Shielding.
-  - 🐍 **Goa'uld**: +25% Military Might, Sarcophagus Healing, Jaffa Armadas.
-  - 🤖 **Replicator**: +30% Unit Production, Nanite Replication, Rapid Fleet Forging.
-  - 🌍 **Tau'ri (Earth)**: +20% Espionage & Covert Recon, Trinium Composite Tech.
-  - 🏛️ **Tollan**: +25% Income & Planetary Ion Cannons, Phase-Shifting Tech.
-- **Galactic Governments**: Military Junta, Technocracy, Feudal Empire, Republic, and Cybernetic Hive Mind each offering distinct economic and combat modifiers.
-- **Multi-Commander Profiles**: Switch between saved commander profiles, customize commander details, and review career statistics.
+1. **Control Center** — live train control, movement boards, service regulation, and control-room logs.
+2. **Timetable & Service** — timetable editing, service patterns, headway planning, and schedule publication.
+3. **Network Infrastructure** — network maps, route libraries, track sections, and engineering access.
+4. **Train Fleet** — fleet monitoring, consist design, vehicle registry, and onboard systems.
+5. **Stations & Terminals** — station operations, platform control, yard operations, and passenger flow.
+6. **Signaling & Control** — signals, interlocking, crossings, and safety events.
+7. **Asset Maintenance** — maintenance control, infrastructure health, fleet maintenance, and inspections.
+8. **Crew Operations** — crew control, duty planning, hours/compliance, and qualification/training.
+9. **Safety & Emergency** — incident command, alerts, investigations, and emergency response.
+10. **Performance Intelligence** — operations KPIs, punctuality, capacity planning, and management reporting.
+11. **Administration & Security** — identity/access, configuration, audit/security, and integrations.
 
-### 2. Economy & Empire Management
-- **Resources**: Naquadah, Banked Naquadah, Metal, Crystal, Deuterium, Energy, and Dark Matter.
-- **Imperial Bank & Vault**: Deposit and withdraw Naquadah with race-based interest rules.
-- **DEFCON Readiness Levels**: Adjust empire defense posture.
-- **Turn Scheduler**: Turn processing, production tick configuration, and execution logs.
+## Navigation and IDs
 
-### 3. Armory, Training & Unit Roster
-- **Armory & Depot**: Tiered weapons, kinetic armor, energy shields, durability, and repair mechanics.
-- **Unit Training**: Recruits, miners, lifers, assault infantry, garrisons, covert spies, and specialist units.
-- **Unit Roster**: Faction-specific military units and combat roles.
+The application uses stable identifiers for automation, routing, permissions, testing, and API integration:
 
-### 4. Technology, Laboratories & Blueprint Manufacturing
-- **Master Tech Tree**: Offense, Defense, Covert, and Anti-Covert disciplines.
-- **Research Library**: Energy systems, hyperspace drives, graviton physics, and tachyon communications.
-- **Blueprint Manufacturing**: Material- and time-efficiency research to optimize production costs and cycle times.
+```text
+Menu ID:    railway.<domain>
+Module ID:  <domain-name>
+Page ID:    railway.page.<page-name>
+Action ID:  <verb>
+```
 
-### 5. Galaxy & Combat Systems
-- **Galaxy Navigation Grid**: Galaxies 1–9, solar systems 1–499, and 15 planetary orbital slots per system.
-- **Espionage & Sensors**: Recon missions and sensor systems.
-- **Missile Silos**: Strategic missile and planetary-defense mechanics.
-- **Debris Recycling**: Recover resources after space battles.
-- **Alliance Combat**: Coordinate joint fleet attacks and planetary defense operations.
+The current navigation catalog contains **11 main menus and 44 operational pages**. See `docs/RAILWAY_MENU_PAGE_ID_CATALOG.md`.
 
-### 6. Hyperspace, Stargates & Motherships
-- **Mothership Command**: Capital-ship profiles, subsystem allocation, and flagship abilities.
-- **Tactical Abilities**: Bombardment, shield overcharge, micro-jumps, and fleet auras.
-- **Stargate Network**: Seven-symbol gate addresses, network routes, and iris controls.
+## Platform Architecture
 
-### 7. Store & Battle Pass
-- **Imperial Store**: Officer contracts, production boosters, and relic caches.
-- **Seasonal Battle Pass**: Free and VIP progression tracks, daily objectives, and reward tiers.
+```text
+Railway Web UI
+    │
+    ├── Command Center Shell
+    ├── Module Navigation
+    ├── Page Controllers
+    ├── Maps / Tables / Timelines / Inspectors
+    └── Alerts / Workflows / Audit UI
+             │
+             ▼
+       Railway API Layer
+             │
+    ┌────────┼─────────┐
+    ▼        ▼         ▼
+ Operations Data   Identity   Integration Services
+    │
+    ├── Trains
+    ├── Services
+    ├── Infrastructure
+    ├── Stations
+    ├── Signals
+    ├── Maintenance
+    ├── Crew
+    └── Safety
+```
 
-### 8. Planetary & Lunar Encyclopedia
-- Planetary classes A–Z, lunar archetypes, nine planet-size tiers, and interstellar phenomena.
+## Technology
 
----
+- React + TypeScript
+- Vite
+- Tailwind CSS and application-specific railway control-room CSS
+- Lucide React icons
+- Typed railway API client
+- Responsive desktop/tablet/mobile layouts
+- GitHub Pages-compatible frontend deployment
+- Optional backend services under `backend/`
+- Android wrapper under `android/`
 
-## 🛠️ Tech Stack
-
-- **Frontend**: React and TypeScript
-- **Styling**: Tailwind CSS
-- **Iconography**: Lucide React
-- **Audio**: Web Audio API synthesizer (`src/sound.ts`)
-- **Bundler**: Vite
-
-## 🚀 Quick Start
-
-Requirements: Node.js compatible with the Vite version in `package.json`, and npm.
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-Run local validation:
+Validation:
 
 ```bash
 npm run lint
 npm run build
 ```
 
-> **CI note:** The current GitHub Pages workflow treats TypeScript type-checking as non-blocking while existing errors are addressed. A successful Pages deployment should not be treated as proof that `npm run lint` passes.
+A successful deployment should not be interpreted as a substitute for local type checking and operational testing.
 
-## 📚 Documentation
+## Documentation
 
-- [Master Game Design Document](GDD.md)
+### Core
 - [Systems Manual](SYSTEMS_MANUAL.md)
+- [Platform Documentation](DOCUMENTATION.md)
 - [API and Data Specification](API_AND_DATA_SPEC.md)
 - [API Contract](API_CONTRACT.md)
 - [Architecture UML](ARCHITECTURE_UML.md)
-- [Full Documentation](DOCUMENTATION.md)
-- [Engineering Roadmap](docs/ENGINEERING_ROADMAP.md)
-- [Release Verification Checklist](docs/RELEASE_VERIFICATION.md)
-- [Security Specification](security_spec.md)
-- [Source Code Reference](docs/SOURCE_CODE_REFERENCE.md)
-- [Component Architecture](docs/COMPONENTS_ARCHITECTURE.md)
-- [Data Models Reference](docs/DATA_MODELS_REFERENCE.md)
-- [State Management and Engine](docs/STATE_MANAGEMENT_AND_ENGINE.md)
-- [Combat Engine](docs/COMBAT_ENGINE.md)
-- [Economy Specification](docs/ECONOMY_SPEC.md)
-- [Stargate Network](docs/STARGATE_NETWORK.md)
-- [UML Diagrams](docs/UML_DIAGRAMS.md)
+- [Engineering Changelog](CHANGELOG.md)
 
-## 📁 Main Source Layout
+### Railway Architecture
+- [Railway Platform Architecture](docs/RAILWAY_PLATFORM_ARCHITECTURE.md)
+- [Railway UI / GUI Specification](docs/RAILWAY_UI_GUI_SPEC.md)
+- [Railway Menu / Page / ID Catalog](docs/RAILWAY_MENU_PAGE_ID_CATALOG.md)
+- [Component Architecture](docs/COMPONENTS_ARCHITECTURE.md)
+- [Data Models](docs/DATA_MODELS_REFERENCE.md)
+- [State Management](docs/STATE_MANAGEMENT_AND_ENGINE.md)
+- [Source Code Reference](docs/SOURCE_CODE_REFERENCE.md)
+- [UML Diagrams](docs/UML_DIAGRAMS.md)
+- [Engineering Roadmap](docs/ENGINEERING_ROADMAP.md)
+- [Release Verification](docs/RELEASE_VERIFICATION.md)
+
+## Source Layout
 
 ```text
-.github/workflows/  GitHub Pages and Android build workflows
-android/            Android wrapper and app packaging
-backend/            Backend and database scaffolding
-docs/               Engineering, system, and release documentation
-src/App.tsx         Main game state and view composition
-src/components/     Navigation, HUD, and gameplay views
-src/data/           Data sets and system definitions
-src/utils/          Shared game calculations and helpers
+src/
+  components/railway/     Railway shell, workspace, modules, controls
+  railway/                Navigation definitions and typed API client
+  components/             Shared application views
+  styles/                 Railway and application UI styling
+  App.tsx                 Application composition and route selection
+backend/                  Backend and database scaffolding
+android/                  Android application wrapper
+docs/                     Railway engineering documentation
+.github/workflows/        CI, Pages, and Android workflows
 ```
 
-## 🧭 Engineering Status
+## Safety Boundary
 
-This repository includes a browser game client and supporting backend/mobile scaffolding. GitHub Pages hosts a static client; persistent competitive multiplayer requires a trusted server to authorize and resolve resource transactions, turns, and combat. See the [Engineering Roadmap](docs/ENGINEERING_ROADMAP.md) for prioritized work.
+This software is a planning, monitoring, visualization, and control-system prototype. It does not by itself provide certified railway signaling, interlocking, positive train control, automatic train protection, or safety-critical authorization. Any deployment affecting real railway movement must use independently validated, certified, fail-safe systems and appropriate operational procedures.
 
-## 📜 License & Acknowledgments
+## Status
 
-Universe Civilization: Empire at Wars is an educational game simulator inspired by classic browser space MMOs and science-fiction space strategy themes.
+The repository is being migrated from its original space-strategy application into a railway operations software platform. Railway navigation, IDs, UI architecture, typed API contracts, and control-room components are being implemented incrementally.
