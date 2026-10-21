@@ -38,7 +38,7 @@ export const INITIAL_RAILWAY_DOMAIN_STATE: RailwayOperationsSnapshot = {
   timetables: [{ id: 'TT-2026-10-20', version: 'v1', serviceDate: '2026-10-20', status: 'published', services: ['SRV-401','SRV-118','SRV-772'], publishedAt: '2026-10-19T18:00:00Z' }],
   routes: [{ id: 'RT-NTH-CEN', name: 'North Corridor', origin: 'NTH', destination: 'CEN', sections: ['TRK-N01','TRK-N02'], direction: 'bidirectional', status: 'available' }],
   platforms: [{ id: 'PL-CEN-04', stationId: 'STA-CEN', name: 'Platform 4', lengthM: 220, status: 'available' }],
-  vehicles: [{ id: 'VEH-0401', fleetNumber: '401', className: 'EMU-400', type: 'multiple-unit', status: 'assigned', mileageKm: 482110 }],
+  vehicles: [{ id: 'VEH-0401', fleetNumber: '401', className: 'EMU-400', type: 'multiple-unit', status: 'available', mileageKm: 482110 }],
   consists: [{ id: 'CST-0401', serviceId: 'SRV-401', vehicles: ['VEH-0401'], formationStatus: 'released' }],
   crew: [{ id: 'CREW-1001', employeeNumber: 'E1001', name: 'Operations Crew 01', role: 'driver', status: 'on-duty', hoursToday: 4.5, qualificationIds: ['QUAL-DRIVER-MAINLINE'] }],
   duties: [{ id: 'DUTY-7001', crewMemberId: 'CREW-1001', start: '07:00', end: '15:00', serviceIds: ['SRV-401'], status: 'active' }],
