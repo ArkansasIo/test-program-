@@ -1,7 +1,7 @@
 {
   "name": "railway-operations-control",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
@@ -12,7 +12,8 @@
     "railway:smoke": "tsx scripts/railway-smoke.ts",
     "railway:domain-smoke": "tsx scripts/railway-domain-smoke.ts",
     "railway:api": "tsx server/railwayApiServer.ts",
-    "railway:api-smoke": "tsx scripts/railway-api-smoke.ts"
+    "railway:api-smoke": "tsx scripts/railway-api-smoke.ts",
+    "railway:server": "tsx server/railwayApiServer.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
