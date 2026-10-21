@@ -1,12 +1,36 @@
-# Tactical Combat & Fleet Operations Specification
+# Railway Movement & Regulation Engine
 
-## 1. Combat Phases
-1. **Long-Range Missile Silo Exchange**: Interplanetary Missiles (IPM) vs. Anti-Ballistic Missiles (ABM).
-2. **Spinal Lance Superweapons**: Mothership Doomsday discharges.
-3. **Space Fleet Fleet Battle**: Corvettes, Cruisers, Battleships, Dreadnoughts, and Deathstars (Up to 6 combat rounds).
-4. **Planetary Ground Incursion**: Assault infantry & Super-Units vs. Fortified Planetary Garrisons.
-5. **Debris Field Generation & Plunder**: 30% of destroyed metal/crystal forms recyclable orbit debris.
+This document replaces the former combat-engine concept with railway movement and service-regulation logic.
 
-## 2. Damage Resolution Formula
-$$\text{Damage Applied} = \max\Big(1, \text{AttackerFirepower} \times (1 + \text{OffenseTech} \times 0.10) - \text{DefenderShields}\Big)$$
-$$\text{Structural Loss} = \frac{\text{Damage Applied}}{\text{HullIntegrity} \times (1 + \text{DefenseTech} \times 0.10)}$$
+## Responsibilities
+
+- Represent planned and live train movements.
+- Validate train state transitions.
+- Calculate schedule variance and delay.
+- Detect route, platform, headway, and service conflicts.
+- Produce recommended regulation actions.
+- Send authorized commands through the railway API.
+
+## State Model
+
+```text
+planned → ready → dispatched → running → arrived → completed
+                         ├→ held
+                         ├→ regulated
+                         └→ cancelled
+```
+
+## Regulation Inputs
+
+- Timetable plan
+- Train position/time
+- Route availability
+- Platform occupancy
+- Speed restrictions
+- Engineering possessions
+- Headway targets
+- Service priority
+
+## Safety Boundary
+
+The engine is an operational software component. It does not replace certified signaling, interlocking, ATP, PTC, ETCS, CBTC, or movement-authority systems.
