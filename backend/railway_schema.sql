@@ -1,0 +1,101 @@
+-- Railway Operations Control Platform schema
+-- Reference/prototype schema; safety-critical authority must be independently validated.
+CREATE TABLE IF NOT EXISTS railway_users (
+  id VARCHAR(64) PRIMARY KEY,
+  username VARCHAR(120) NOT NULL UNIQUE,
+  role VARCHAR(40) NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS railway_trains (
+  id VARCHAR(64) PRIMARY KEY,
+  service_id VARCHAR(64) NOT NULL,
+  service_name VARCHAR(160) NOT NULL,
+  origin VARCHAR(64) NOT NULL,
+  destination VARCHAR(64) NOT NULL,
+  current_location VARCHAR(128) NOT NULL,
+  state VARCHAR(32) NOT NULL,
+  delay_minutes INT NOT NULL DEFAULT 0,
+  next_event VARCHAR(64) NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_train_state (state),
+  INDEX idx_train_service (service_id)
+);
+CREATE TABLE IF NOT EXISTS railway_track_sections (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(160) NOT NULL,
+  from_location VARCHAR(64) NOT NULL,
+  to_location VARCHAR(64) NOT NULL,
+  state VARCHAR(32) NOT NULL,
+  speed_limit_kph INT NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS railway_stations (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(160) NOT NULL,
+  code VARCHAR(16) NOT NULL UNIQUE,
+  platforms INT NOT NULL DEFAULT 0,
+  state VARCHAR(32) NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS railway_vehicles (
+  id VARCHAR(64) PRIMARY KEY,
+  fleet_number VARCHAR(64) NOT NULL UNIQUE,
+  class_name VARCHAR(100) NOT NULL,
+  vehicle_type VARCHAR(40) NOT NULL,
+  state VARCHAR(40) NOT NULL,
+  mileage_km BIGINT NOT NULL DEFAULT 0,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS railway_crew_members (
+  id VARCHAR(64) PRIMARY KEY,
+  employee_number VARCHAR(64) NOT NULL UNIQUE,
+  name VARCHAR(160) NOT NULL,
+  role VARCHAR(40) NOT NULL,
+  state VARCHAR(40) NOT NULL,
+  hours_today DECIMAL(6,2) NOT NULL DEFAULT 0,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS railway_maintenance_work_orders (
+  id VARCHAR(64) PRIMARY KEY,
+  asset_id VARCHAR(64) NOT NULL,
+  asset_type VARCHAR(40) NOT NULL,
+  priority VARCHAR(20) NOT NULL,
+  state VARCHAR(32) NOT NULL,
+  due_at DATETIME NOT NULL,
+  assigned_team VARCHAR(120),
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_work_order_state (state),
+  INDEX idx_work_order_due (due_at)
+);
+CREATE TABLE IF NOT EXISTS railway_incidents (
+  id VARCHAR(64) PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  severity VARCHAR(20) NOT NULL,
+  state VARCHAR(32) NOT NULL,
+  location VARCHAR(160) NOT NULL,
+  opened_at DATETIME NOT NULL,
+  commander VARCHAR(120),
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS railway_alerts (
+  id VARCHAR(64) PRIMARY KEY,
+  severity VARCHAR(20) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  acknowledged BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  acknowledged_at TIMESTAMP NULL
+);
+CREATE TABLE IF NOT EXISTS railway_audit_events (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  actor_id VARCHAR(64) NOT NULL,
+  action VARCHAR(120) NOT NULL,
+  resource_type VARCHAR(80) NOT NULL,
+  resource_id VARCHAR(120) NOT NULL,
+  outcome VARCHAR(20) NOT NULL,
+  occurred_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_audit_resource (resource_type, resource_id),
+  INDEX idx_audit_actor (actor_id)
+);
