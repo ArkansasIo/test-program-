@@ -1,0 +1,349 @@
+/*
+ * PROGRAM REDESIGN SYSTEM
+ *
+ * Shared visual layer for every route and sub-route. The goal is a
+ * consistent training-program / command-program presentation:
+ * hierarchy -> status -> metrics -> work area -> actions.
+ */
+
+:root {
+  --program-bg: #07111d;
+  --program-surface: #0b1726;
+  --program-surface-2: #0f1f31;
+  --program-surface-3: #13273d;
+  --program-line: #29415a;
+  --program-line-soft: #1b3147;
+  --program-text: #e8f1f8;
+  --program-muted: #8fa6ba;
+  --program-cyan: #55d6ff;
+  --program-blue: #4f8cff;
+  --program-green: #45d483;
+  --program-amber: #ffc857;
+  --program-red: #ff6b6b;
+  --program-radius: 4px;
+  --program-shadow: 0 12px 32px rgba(0, 0, 0, 0.32);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(circle at 15% 0%, rgba(85, 214, 255, 0.07), transparent 32rem),
+    radial-gradient(circle at 100% 15%, rgba(79, 140, 255, 0.06), transparent 30rem),
+    var(--program-bg) !important;
+  color: var(--program-text);
+}
+
+/* Main program stage shared by every page/sub-page. */
+#main-content-scroll {
+  position: relative;
+  background:
+    linear-gradient(rgba(85, 214, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(85, 214, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(4, 12, 22, 0.98), rgba(7, 17, 29, 0.98)) !important;
+  background-size: 32px 32px, 32px 32px, auto !important;
+  scrollbar-color: var(--program-line) var(--program-bg);
+}
+
+#main-content-scroll > div {
+  position: relative;
+  width: min(1500px, calc(100% - 0.5rem));
+  padding-bottom: 2rem;
+}
+
+/* Universal page section hierarchy. Existing route components inherit this. */
+#main-content-scroll section,
+#main-content-scroll article,
+#main-content-scroll [role="tabpanel"] {
+  border-color: var(--program-line-soft) !important;
+}
+
+#main-content-scroll h1,
+#main-content-scroll h2,
+#main-content-scroll h3 {
+  letter-spacing: 0.045em;
+}
+
+#main-content-scroll h1 {
+  text-transform: uppercase;
+  font-size: clamp(1.25rem, 2vw, 1.8rem);
+}
+
+#main-content-scroll h2 {
+  text-transform: uppercase;
+  font-size: clamp(0.95rem, 1.5vw, 1.2rem);
+}
+
+/* Treat bordered white cards as program panels while retaining existing markup. */
+#main-content-scroll .border,
+#main-content-scroll .border-2,
+#main-content-scroll .border-t,
+#main-content-scroll .border-b,
+#main-content-scroll .border-l,
+#main-content-scroll .border-r {
+  border-color: var(--program-line) !important;
+}
+
+#main-content-scroll .bg-white,
+#main-content-scroll .bg-\[\#ffffff\],
+#main-content-scroll .bg-\[\#fafafa\],
+#main-content-scroll .bg-\[\#f8fafc\] {
+  background-color: var(--program-surface) !important;
+  color: var(--program-text) !important;
+}
+
+#main-content-scroll .bg-neutral-50,
+#main-content-scroll .bg-neutral-100,
+#main-content-scroll .bg-slate-50,
+#main-content-scroll .bg-slate-100 {
+  background-color: var(--program-surface-2) !important;
+}
+
+#main-content-scroll .text-\[\#111\],
+#main-content-scroll .text-\[\#111111\],
+#main-content-scroll .text-\[\#333\],
+#main-content-scroll .text-\[\#444\],
+#main-content-scroll .text-\[\#555\] {
+  color: var(--program-text) !important;
+}
+
+#main-content-scroll .text-\[\#666\],
+#main-content-scroll .text-\[\#777\],
+#main-content-scroll .text-slate-500,
+#main-content-scroll .text-slate-600 {
+  color: var(--program-muted) !important;
+}
+
+/* Program controls: consistent, dense, keyboard-friendly command buttons. */
+#main-content-scroll button,
+#main-content-scroll [role="button"] {
+  border-radius: var(--program-radius);
+  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+}
+
+#main-content-scroll button:hover,
+#main-content-scroll [role="button"]:hover {
+  border-color: var(--program-cyan) !important;
+  box-shadow: 0 0 0 1px rgba(85, 214, 255, 0.08), 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+#main-content-scroll button:focus-visible,
+#main-content-scroll input:focus-visible,
+#main-content-scroll select:focus-visible,
+#main-content-scroll textarea:focus-visible {
+  outline: 2px solid var(--program-cyan);
+  outline-offset: 2px;
+}
+
+#main-content-scroll input,
+#main-content-scroll select,
+#main-content-scroll textarea {
+  background-color: var(--program-surface-2) !important;
+  color: var(--program-text) !important;
+  border-color: var(--program-line) !important;
+}
+
+#main-content-scroll input::placeholder,
+#main-content-scroll textarea::placeholder {
+  color: #6f879b;
+}
+
+/* Data surfaces. */
+#main-content-scroll table {
+  border-color: var(--program-line) !important;
+  background: var(--program-surface);
+}
+
+#main-content-scroll th {
+  background: var(--program-surface-3) !important;
+  color: var(--program-cyan) !important;
+  border-color: var(--program-line) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+}
+
+#main-content-scroll td {
+  border-color: var(--program-line-soft) !important;
+}
+
+#main-content-scroll tr:hover td {
+  background: rgba(85, 214, 255, 0.035);
+}
+
+/* Reusable program primitives for new and refactored pages. */
+.program-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.program-page__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--program-line);
+  border-left: 3px solid var(--program-cyan);
+  background: linear-gradient(90deg, rgba(19, 39, 61, 0.95), rgba(11, 23, 38, 0.95));
+  box-shadow: var(--program-shadow);
+}
+
+.program-page__eyebrow {
+  color: var(--program-cyan);
+  font: 700 0.68rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.program-page__title {
+  margin: 0.25rem 0 0;
+  color: var(--program-text);
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.program-page__subtitle {
+  margin-top: 0.35rem;
+  color: var(--program-muted);
+  font-size: 0.76rem;
+}
+
+.program-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.program-card {
+  min-width: 0;
+  padding: 0.95rem;
+  border: 1px solid var(--program-line);
+  border-radius: var(--program-radius);
+  background: linear-gradient(180deg, rgba(15, 31, 49, 0.98), rgba(11, 23, 38, 0.98));
+  box-shadow: var(--program-shadow);
+}
+
+.program-card--span-3 { grid-column: span 3; }
+.program-card--span-4 { grid-column: span 4; }
+.program-card--span-6 { grid-column: span 6; }
+.program-card--span-8 { grid-column: span 8; }
+.program-card--span-12 { grid-column: span 12; }
+
+.program-card__label {
+  color: var(--program-muted);
+  font: 700 0.65rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.program-card__value {
+  margin-top: 0.25rem;
+  color: var(--program-text);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.program-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  font: 700 0.62rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.program-status--ready { color: var(--program-green); }
+.program-status--active { color: var(--program-cyan); }
+.program-status--warning { color: var(--program-amber); }
+.program-status--danger { color: var(--program-red); }
+
+.program-progress {
+  height: 0.35rem;
+  overflow: hidden;
+  background: #07111d;
+  border: 1px solid var(--program-line);
+}
+
+.program-progress > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--program-blue), var(--program-cyan));
+}
+
+.program-subnav {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding: 0.4rem;
+  border: 1px solid var(--program-line);
+  background: var(--program-surface);
+  scrollbar-width: thin;
+}
+
+.program-subnav > * {
+  flex: 0 0 auto;
+}
+
+.program-rail {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.program-rail__item {
+  padding: 0.55rem;
+  border: 1px solid var(--program-line-soft);
+  background: var(--program-surface-2);
+  color: var(--program-muted);
+  font: 700 0.62rem/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-transform: uppercase;
+}
+
+.program-rail__item[data-active="true"] {
+  border-color: var(--program-cyan);
+  color: var(--program-cyan);
+  background: rgba(85, 214, 255, 0.06);
+}
+
+@media (max-width: 900px) {
+  .program-card--span-3,
+  .program-card--span-4,
+  .program-card--span-6,
+  .program-card--span-8 {
+    grid-column: span 12;
+  }
+
+  .program-page__header {
+    grid-template-columns: 1fr;
+  }
+
+  .program-rail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  #main-content-scroll > div {
+    width: calc(100% - 0.25rem);
+  }
+
+  .program-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main-content-scroll button,
+  #main-content-scroll [role="button"] {
+    transition: none;
+  }
+}
