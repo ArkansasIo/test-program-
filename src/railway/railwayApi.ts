@@ -4,18 +4,42 @@ export interface RailwayApiResponse<T = unknown> { ok: boolean; data?: T; error?
 export interface RailwayEntity { id: string; status: string; updatedAt: string; }
 export interface TrainRecord extends RailwayEntity { serviceNumber: string; name: string; origin: string; destination: string; location: string; delayMinutes: number; platform?: string; occupancy?: number; }
 export interface DispatchCommand { trainId: string; command: 'dispatch' | 'hold' | 'reroute' | 'stop' | 'release'; target?: string; reason?: string; }
-export interface RailwayApiClientOptions { baseUrl?: string; fetchImpl?: typeof fetch; }
+export interface RailwayApiClientOptions { baseUrl?: string; fetchImpl?: typeof fetch; userId?: string; username?: string; role?: string; }
 const requestId = () => `rail-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const id = (value: string) => encodeURIComponent(value);
+
 export class RailwayApiClient {
-  private readonly baseUrl: string; private readonly fetchImpl: typeof fetch;
-  constructor(options: RailwayApiClientOptions = {}) { this.baseUrl = (options.baseUrl ?? '/api/railway').replace(/\/$/, ''); this.fetchImpl = options.fetchImpl ?? fetch; }
+  private readonly baseUrl: string;
+  private readonly fetchImpl: typeof fetch;
+  private readonly userId: string;
+  private readonly username: string;
+  private readonly role: string;
+
+  constructor(options: RailwayApiClientOptions = {}) {
+    this.baseUrl = (options.baseUrl ?? '/api/railway').replace(/\/$/, '');
+    this.fetchImpl = options.fetchImpl ?? fetch;
+    this.userId = options.userId ?? 'ui-user';
+    this.username = options.username ?? 'operations-ui';
+    this.role = options.role ?? 'viewer';
+  }
+
   async request<TResponse = unknown, TBody = unknown>(request: RailwayApiRequest<TBody>): Promise<RailwayApiResponse<TResponse>> {
-    const response = await this.fetchImpl(`${this.baseUrl}${request.path}`, { method: request.method, headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: request.body === undefined ? undefined : JSON.stringify(request.body) });
+    const response = await this.fetchImpl(`${this.baseUrl}${request.path}`, {
+      method: request.method,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'X-Railway-User': this.userId,
+        'X-Railway-Username': this.username,
+        'X-Railway-Role': this.role,
+      },
+      body: request.body === undefined ? undefined : JSON.stringify(request.body),
+    });
     const payload = await response.json().catch(() => undefined);
-    if (!response.ok) return { ok: false, error: payload?.error ?? { code: `HTTP_${response.status}`, message: response.statusText || 'Request failed' }, requestId: requestId(), timestamp: new Date().toISOString() };
+    if (!response.ok) return { ok: false, error: payload?.error ?? { code: `HTTP_${response.status}`, message: response.statusText || 'Request failed' }, requestId: payload?.requestId ?? requestId(), timestamp: new Date().toISOString() };
     return { ok: true, data: payload?.data ?? payload, requestId: payload?.requestId ?? requestId(), timestamp: new Date().toISOString() };
   }
+
   get<T>(path: string, query?: RailwayApiRequest['query']) { const params = new URLSearchParams(); Object.entries(query ?? {}).forEach(([key, value]) => value !== undefined && params.set(key, String(value))); return this.request<T>({ method: 'GET', path: `${path}${params.toString() ? `?${params}` : ''}` }); }
   post<T, B = unknown>(path: string, body: B) { return this.request<T, B>({ method: 'POST', path, body }); }
   put<T, B = unknown>(path: string, body: B) { return this.request<T, B>({ method: 'PUT', path, body }); }
@@ -50,4 +74,5 @@ export class RailwayApiClient {
   getAuditLog(query?: RailwayApiRequest['query']) { return this.get<unknown[]>('/admin/audit', query); }
   getIntegrations(query?: RailwayApiRequest['query']) { return this.get<unknown[]>('/admin/integrations', query); }
 }
+
 export const railwayApi = new RailwayApiClient();
