@@ -4,10 +4,16 @@ import { checkRailwayHealth, overallHealth } from '../src/railway/railwayHealth'
 import { railwayAuditLog } from '../src/railway/railwayAudit';
 import { railwayEventBus } from '../src/railway/railwayEvents';
 import { selectAvailableVehicles, selectOpenWorkOrders } from '../src/railway/railwaySelectors';
+import { principalFromRequest, requireRailwayRole } from './railwayAuthMiddleware';
 
 export function createRailwayServer() {
   const app = express();
   app.use(express.json());
+
+  app.use((req, res, next) => {
+    res.setHeader('X-Railway-Service', 'railway-operations-control');
+    next();
+  });
 
   app.get('/api/railway/health', (_req, res) => {
     const state = railwayOperationsService.getDomainState();
@@ -21,23 +27,24 @@ export function createRailwayServer() {
   app.get('/api/railway/vehicles', (_req, res) => res.json({ data: railwayOperationsService.getDomainState().vehicles }));
   app.get('/api/railway/maintenance/work-orders', (_req, res) => res.json({ data: railwayOperationsService.getDomainState().maintenance }));
   app.get('/api/railway/incidents', (_req, res) => res.json({ data: railwayOperationsService.getDomainState().incidents }));
-  app.get('/api/railway/admin/audit', (_req, res) => res.json({ data: railwayAuditLog.all() }));
+  app.get('/api/railway/admin/audit', requireRailwayRole('safety'), (_req, res) => res.json({ data: railwayAuditLog.all() }));
   app.get('/api/railway/analytics/kpis', (_req, res) => res.json({ data: railwayOperationsService.getControlState().kpis }));
   app.get('/api/railway/analytics/capacity', (_req, res) => {
     const state = railwayOperationsService.getDomainState();
     res.json({ data: { availableVehicles: selectAvailableVehicles(state).length, openWorkOrders: selectOpenWorkOrders(state).length, services: state.services.length } });
   });
 
-  app.post('/api/railway/dispatch/commands', (req, res) => {
+  app.post('/api/railway/dispatch/commands', requireRailwayRole('dispatcher'), (req, res) => {
     const { trainId, command } = req.body ?? {};
     if (typeof trainId !== 'string' || !['dispatch', 'hold', 'stop', 'reroute'].includes(command)) {
       res.status(400).json({ error: { code: 'INVALID_COMMAND', message: 'trainId and a supported movement command are required' } });
       return;
     }
+    const principal = principalFromRequest(req);
     const state = railwayOperationsService.command(trainId, command);
-    railwayAuditLog.record({ actorId: 'api-user', action: command, resourceType: 'train', resourceId: trainId, outcome: 'success' });
+    railwayAuditLog.record({ actorId: principal.id, action: command, resourceType: 'train', resourceId: trainId, outcome: 'success' });
     const eventType = command === 'dispatch' ? 'train.dispatched' : command === 'hold' ? 'train.held' : command === 'stop' ? 'train.stopped' : 'train.rerouted';
-    railwayEventBus.publish(eventType, { trainId }, 'railway.api');
+    railwayEventBus.publish(eventType, { trainId, actorId: principal.id }, 'railway.api');
     res.json({ data: { accepted: true, state } });
   });
 
