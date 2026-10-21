@@ -1,17 +1,30 @@
-# Economy & Colonial Maintenance Specification
+# Railway Resource & Capacity Specification
 
-## 1. Natural Turn Income Formula
-$$\text{Net Natural Base} = \max\Big(0, (U \times 20) + ((M + L) \times 80) + \sum \text{Tribute}(p) - \sum \text{Maintenance}(p)\Big)$$
-$$\text{Final Turn Income} = \text{Net Natural Base} \times \text{RaceMultiplier} \times \text{DEFCONMultiplier}$$
+Railway software does not use the former game economy model. Resource planning is represented through operational capacity, infrastructure availability, fleet availability, crew availability, maintenance capacity, and service demand.
 
-## 2. Maintenance Breakdown Pillars
-- **Civil Administration**: 35%
-- **Interstellar Logistics**: 25%
-- **Life Support Sustenance**: 20%
-- **Garrison Security**: 20%
+## Capacity Domains
 
-## 3. Expansion Efficiency Thresholds
-- **Optimal ( $\ge 65\%$ Margin)**: Thriving surplus, low logistical overhead.
-- **Sustainable ($45\% - 64\%$ Margin)**: Healthy economy, steady colonial growth.
-- **Strained ($25\% - 44\%$ Margin)**: Rapid expansion creating high logistical overhead.
-- **Over-Extended ($< 25\%$ Margin)**: Severe deficit risk; requires immediate workforce or specialization mitigation.
+- Track capacity
+- Platform capacity
+- Fleet capacity
+- Crew capacity
+- Maintenance capacity
+- Depot/yard capacity
+- Passenger capacity
+- Timetable capacity
+
+## Capacity Planning
+
+Capacity views should expose planned capacity, consumed capacity, reserve, restrictions, and forecast demand. Changes should be versioned and auditable.
+
+## Performance Measures
+
+- On-time performance
+- Average delay
+- Headway adherence
+- Fleet utilization
+- Platform utilization
+- Crew utilization
+- Maintenance backlog
+- Cancellation rate
+- Service reliability
